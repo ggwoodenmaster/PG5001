@@ -1,0 +1,6 @@
+{
+    "configuration": "cpu=atmega2560",
+    "board": "arduino:avr:mega",
+    "sketch": "reimplt\\reimplt.ino",
+    "output": "C:\\Users\\Pkelven\\Desktop\\PG5001\\build\\prior"
+}
