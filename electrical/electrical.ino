@@ -8,11 +8,39 @@
 #define STEPPER_1_STEP 27
 #define STEPPER_1_STEPS_PER_REVOLUTION 100
 
+#define PUMP_3_CONTROL_1 28
+#define PUMP_3_CONTROL_2 29
+#define PUMP_3_PWM 4 // needs PWM pin
+#define PUMP_4_CONTROL_1 30
+#define PUMP_4_CONTROL_2 31
+#define PUMP_4_PWM 5 // needs PWM pin
+
+
+
+// determine global direction calibrations
 void setup() {
+    // set OUTPUT declearations
+    // ...
     movePump(PUMP_1_CONTROL_1, PUMP_1_CONTROL_2, PUMP_1_PWM, HIGH, LOW); // pump 1 forward
     moveStepper_1(STEPPER_1_DIRECTION, STEPPER_1_STEP, HIGH); // stepper 1 to chamber 1
+    movePump(PUMP_1_CONTROL_1, PUMP_1_CONTROL_2, PUMP_1_PWM, LOW, HIGH); // pump 1 backward
+    moveStepper_1(STEPPER_1_DIRECTION, STEPPER_1_STEP, LOW); // stepper 1 to chamber 2
+    for (int count = 0; count < 2; count += 1) {
+        movePump(PUMP_2_CONTROL_1, PUMP_2_CONTROL_2, PUMP_2_PWM, HIGH, LOW); // pump 2 forward
+        movePump(PUMP_2_CONTROL_1, PUMP_2_CONTROL_2, PUMP_2_PWM, LOW, HIGH); // pump 2 backward
+    }
     movePump(PUMP_2_CONTROL_1, PUMP_2_CONTROL_2, PUMP_2_PWM, HIGH, LOW); // pump 2 forward
-
+    for (int count = 0; count < 2; count += 1) {
+        movePump(PUMP_3_CONTROL_1, PUMP_3_CONTROL_2, PUMP_3_PWM, HIGH, LOW); // pump 3 forward
+        moveStepper_1(STEPPER_1_DIRECTION, STEPPER_1_STEP, HIGH); // stepper 1 to chamber 1
+        movePump(PUMP_3_CONTROL_1, PUMP_3_CONTROL_2, PUMP_3_PWM, LOW, HIGH); // pump 3 backward
+        moveStepper_1(STEPPER_1_DIRECTION, STEPPER_1_STEP, LOW); // stepper 1 to chamber 2
+    }
+    moveStepper_1(STEPPER_1_DIRECTION, STEPPER_1_STEP, HIGH); // stepper 1 to chamber 1
+    movePump(PUMP_4_CONTROL_1, PUMP_4_CONTROL_2, PUMP_4_PWM, HIGH, LOW); // pump 4 forward
+    moveStepper_1(STEPPER_1_DIRECTION, STEPPER_1_STEP, LOW); // stepper 1 to chamber 2
+    // set expansion procedures
+    // ...
 }
 
 void loop() {
