@@ -9,8 +9,8 @@
 #define CHECKPOINT_INTERVAL_TOTAL_SIZE 11
 #define CHECKPOINT_INTERVAL_BEFORE_PERFUSION_SIZE 7
 #define CHECKPOINT_INTERVAL {1,2,3,4,5,6,7,8,9,10,11}
-#define PERFUSION_FACTOR_SIZE 5
-#define PERFUSION_FACTOR {0.35,0.45,0.55,0.65,0.75}
+#define PERFUSION_FACTOR_SIZE 4
+#define PERFUSION_FACTOR {0.35,0.45,0.55,0.65}
 #define WASTE_MEDIA_OUT_TIME_BEFORE_PERFUSION 2 // main gas out + media loss
 #define TOTAL_GAS_IN_TIME_BEFORE_PERFUSION 2
 #define FRESH_MEDIA_IN_TIME_BEFORE_PERFUSION \
@@ -69,8 +69,9 @@ void setup() {
         setMotorchipdirection(MOTOR_CHIP_ONE_INPUT_B_ONE, MOTOR_CHIP_ONE_INPUT_B_TWO); // Fresh media clockwise
         setMotorchipdirection(MOTOR_CHIP_TWO_INPUT_A_ONE, MOTOR_CHIP_TWO_INPUT_A_TWO); // Waste clockwise
         long time = millis();
-        int checkpoint_interval_index = 1;
+        int checkpoint_interval_index = 0;
         int currentday = getCheckpoint(checkpoint_interval_index);
+        int perfusion_index = 0;
         analogWrite(MOTOR_CHIP_ONE_PWMA_A, 255); // Chamber 2 full
         while (millis() - time < CHAMBER_TWO_IN_TIME) {};
         analogWrite(MOTOR_CHIP_ONE_INPUT_A_ONE, 0); // Chamber 2 stop
@@ -144,6 +145,49 @@ void setup() {
                 delay(5000);
                 digitalWrite(NITROGEN_RELAY, LOW);
                 analogWrite(MOTOR_CHIP_THREE_PWMA_A, 0);
+        }
+        while (currentday <= CHECKPOINT_INTERVAL_TOTAL_SIZE) {
+                time = millis();
+                while (millis() - time < 86400000) {}
+                time = millis();
+                checkpoint_interval_index += 1;
+                currentday = getCheckpoint(checkpoint_interval_index);
+                analogWrite(MOTOR_CHIP_TWO_PWMA_A, 255); // Waste full
+                while (millis() - time <= getMediaperfusion(perfusion_index)) {}
+                analogWrite(MOTOR_CHIP_TWO_PWMA_A, 0); // Waste stop
+                time = millis();
+                analogWrite(MOTOR_CHIP_ONE_PWMA_B, 255); // Fresh media full
+                while (millis() - time <= getMediaperfusion(perfusion_index)) {}
+                analogWrite(MOTOR_CHIP_ONE_PWMA_B, 0); // Fresh media stop
+                time = millis();
+                digitalWrite(CARBON_DIOXIDE_RELAY, HIGH); // HIGH means closed-circuit
+                setvalvedirection(MOTOR_CHIP_TWO_INPUT_B_ONE, MOTOR_CHIP_TWO_INPUT_B_TWO, true);
+                analogWrite(MOTOR_CHIP_TWO_PWMA_B, 255); // CO2 open
+                delay(5000);
+                digitalWrite(CARBON_DIOXIDE_RELAY, LOW);
+                analogWrite(MOTOR_CHIP_TWO_PWMA_B, 0);
+                while (millis() - time < getMediaperfusion(perfusion_index) * AIR_OUT_PERCENTAGE_PERFUSION \
+                * CARBON_DIOXIDE_IN_TIME_UPON_CHAMBER_TWO) {};
+                digitalWrite(CARBON_DIOXIDE_RELAY, HIGH); // HIGH means closed-circuit
+                setvalvedirection(MOTOR_CHIP_TWO_INPUT_B_ONE, MOTOR_CHIP_TWO_INPUT_B_TWO, false);
+                analogWrite(MOTOR_CHIP_TWO_PWMA_B, 255); // CO2 close
+                delay(5000);
+                digitalWrite(CARBON_DIOXIDE_RELAY, LOW);
+                analogWrite(MOTOR_CHIP_TWO_PWMA_B, 0);
+                time = millis();
+                digitalWrite(NITROGEN_RELAY, HIGH); // HIGH means closed-circuit
+                setvalvedirection(MOTOR_CHIP_THREE_INPUT_A_ONE, MOTOR_CHIP_THREE_INPUT_A_TWO, true);
+                analogWrite(MOTOR_CHIP_THREE_PWMA_A, 255); // N2 open
+                delay(5000);
+                digitalWrite(NITROGEN_RELAY, LOW);
+                while (millis() - time < getMediaperfusion(perfusion_index) * AIR_OUT_PERCENTAGE_PERFUSION \
+                * NITROGEN_IN_TIME_BEFORE_PERFUSION) {};
+                setvalvedirection(MOTOR_CHIP_THREE_INPUT_A_ONE, MOTOR_CHIP_THREE_INPUT_A_TWO, false);
+                analogWrite(MOTOR_CHIP_THREE_PWMA_A, 255); // N2 close
+                delay(5000);
+                digitalWrite(NITROGEN_RELAY, LOW);
+                analogWrite(MOTOR_CHIP_THREE_PWMA_A, 0);
+                perfusion_index += 1;
         }
 }
 
