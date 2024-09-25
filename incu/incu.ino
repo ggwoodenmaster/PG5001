@@ -74,11 +74,11 @@ void setup() {
         int perfusion_index = 0;
         analogWrite(MOTOR_CHIP_ONE_PWMA_A, 255); // Chamber 2 full
         while (millis() - time < CHAMBER_TWO_IN_TIME) {};
-        analogWrite(MOTOR_CHIP_ONE_INPUT_A_ONE, 0); // Chamber 2 stop
+        analogWrite(MOTOR_CHIP_ONE_PWMA_A, 0); // Chamber 2 stop
         time = millis();
         analogWrite(MOTOR_CHIP_ONE_PWMA_B, 255); // Fresh media full
         while (millis() - time < FRESH_MEDIA_IN_TIME_UPON_CHAMBER_TWO) {};
-        analogWrite(MOTOR_CHIP_ONE_INPUT_B_ONE, 0); // Fresh media stop
+        analogWrite(MOTOR_CHIP_ONE_PWMA_B, 0); // Fresh media stop
         time = millis();
         digitalWrite(CARBON_DIOXIDE_RELAY, HIGH); // HIGH means closed-circuit
         setvalvedirection(MOTOR_CHIP_TWO_INPUT_B_ONE, MOTOR_CHIP_TWO_INPUT_B_TWO, true);
